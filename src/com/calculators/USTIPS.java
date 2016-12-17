@@ -20,7 +20,10 @@ public class USTIPS
 		double inflationRate = 1;
 		double bondPurchaseAmount = 29864;
 		double bondParVal = 20000;
+		boolean tipsInTaxDeferredAccount = false;
+		double topMarginalTaxRate = 35; //In Percentage
 		
+		double totalTaxDue = 0;
 		double couponInterestEarning = 0;
 		double inflationAdjustedParVal = bondParVal;
 		double paidPremiumAmount = bondPurchaseAmount - bondParVal;
@@ -29,6 +32,13 @@ public class USTIPS
 		for(int a = 0 ; a < timeToMaturityInMonths ; a++)
 		{
 			inflationAdjustedPaidPremiumVal = inflationAdjustedPaidPremiumVal + (inflationAdjustedPaidPremiumVal * ((inflationRate/12)/100));
+			
+			if(!tipsInTaxDeferredAccount)
+			{
+				totalTaxDue = totalTaxDue + (topMarginalTaxRate / 100) * ((inflationAdjustedParVal * ((inflationRate/12)/100)) + 
+						(inflationAdjustedParVal * ((bondCoupon/12)/100)));
+			}
+			
 			inflationAdjustedParVal = inflationAdjustedParVal + (inflationAdjustedParVal * ((inflationRate/12)/100));
 			couponInterestEarning = couponInterestEarning + (inflationAdjustedParVal * ((bondCoupon/12)/100));
 		}
@@ -42,5 +52,6 @@ public class USTIPS
 		System.out.println("[Inflation adjusted par value] "+inflationAdjustedParVal);
 		System.out.println("[Inflation adjusted premium value] "+inflationAdjustedPaidPremiumVal);
 		System.out.println("[Return on paid premium] "+returnOnPremiumPaid);
+		System.out.print("[Total Tax on gains] "+Math.round(totalTaxDue));
 	}
 }
