@@ -1,57 +1,85 @@
 package com.calculators;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.Properties;
+
 public class USTIPS 
-{
-	private class I
-	{
-		
-	}
+{	
 	public static void main(String args[])
 	{
-		//Inputs: 1) bond coupon, 2) bond time to maturity (in months)
-			//	  3) expected yearly inflation rate, 4) total amount paid for the purchase
-		    //    5) bond(s) amount
-		//Outputs: 1) Return on premium (Input# 4 - Input# 5) as percentage, 2) Actual $$ value of the premium investment
-		    //     3) Inflation adjusted value of the premium investment, given Input# 3 
-		
+		Properties props = new Properties();
+		try {
+			props.load(new FileInputStream(System.getProperty("user.dir") + "/config/config.properties"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		//Configure Inputs
-		double bondCoupon = 1.18737;
-		int timeToMaturityInMonths = 126;
-		double inflationRate = 1;
-		double bondPurchaseAmount = 29864;
-		double bondParVal = 20000;
-		boolean tipsInTaxDeferredAccount = false;
-		double topMarginalTaxRate = 35; //In Percentage
+		double bondCoupon = Double.valueOf(props.getProperty("BondCoupon"));
+		int maturityYear = Integer.valueOf(props.getProperty("BondMaturityYear"));
+		int maturityMonth = Integer.valueOf(props.getProperty("BondMaturityMonth"));
+		int maturityDay = Integer.valueOf(props.getProperty("BondMaturityDay"));			
+		double expectedInflationRate = Double.valueOf(props.getProperty("ExplectedInflationRate"));
+		double bondPurchaseAmount = Double.valueOf(props.getProperty("BondPurchaseAmount"));
+		double bondParVal = Double.valueOf(props.getProperty("BondParValue"));
+		boolean tipsInTaxDeferredAccount = Boolean.getBoolean(props.getProperty("BondHeldInTaxAdvantageAccount"));
+		double topMarginalTaxRate = Double.valueOf(props.getProperty("TopMarginalTaxRate")); 
 		
-		double totalTaxDue = 0;
-		double couponInterestEarning = 0;
+		int timeToMaturityInMonths = Util.getNumMonthsTillMaturity(maturityYear, maturityMonth, maturityDay);
+		double totalTaxPaid = 0;
+		double totalCouponInterestEarnings = 0;
 		double inflationAdjustedParVal = bondParVal;
 		double paidPremiumAmount = bondPurchaseAmount - bondParVal;
-		double inflationAdjustedPaidPremiumVal = paidPremiumAmount;
+		double inflationAdjustedPaidPremiumVal = 0;
+		
+		if(paidPremiumAmount > 0)
+		{
+			inflationAdjustedPaidPremiumVal = paidPremiumAmount;
+		}
+		
+		double deltaBtwParAndPurchaseAmount = bondParVal - bondPurchaseAmount;
 		
 		for(int a = 0 ; a < timeToMaturityInMonths ; a++)
 		{
-			inflationAdjustedPaidPremiumVal = inflationAdjustedPaidPremiumVal + (inflationAdjustedPaidPremiumVal * ((inflationRate/12)/100));
+			inflationAdjustedPaidPremiumVal = inflationAdjustedPaidPremiumVal + (inflationAdjustedPaidPremiumVal * ((expectedInflationRate/12)/100));
 			
 			if(!tipsInTaxDeferredAccount)
 			{
-				totalTaxDue = totalTaxDue + (topMarginalTaxRate / 100) * ((inflationAdjustedParVal * ((inflationRate/12)/100)) + 
+				totalTaxPaid = totalTaxPaid + (topMarginalTaxRate / 100) * ((inflationAdjustedParVal * ((expectedInflationRate/12)/100)) + 
 						(inflationAdjustedParVal * ((bondCoupon/12)/100)));
 			}
 			
-			inflationAdjustedParVal = inflationAdjustedParVal + (inflationAdjustedParVal * ((inflationRate/12)/100));
-			couponInterestEarning = couponInterestEarning + (inflationAdjustedParVal * ((bondCoupon/12)/100));
+			inflationAdjustedParVal = inflationAdjustedParVal + (inflationAdjustedParVal * ((expectedInflationRate/12)/100));
+			totalCouponInterestEarnings = totalCouponInterestEarnings + (inflationAdjustedParVal * ((bondCoupon/12)/100));
 		}
 		
-		couponInterestEarning = Math.round(couponInterestEarning);
+		totalCouponInterestEarnings = Math.round(totalCouponInterestEarnings);
 		inflationAdjustedParVal = Math.round(inflationAdjustedParVal);
 		inflationAdjustedPaidPremiumVal = Math.round(inflationAdjustedPaidPremiumVal);
-		double returnOnPremiumPaid = Math.round(((couponInterestEarning - inflationAdjustedPaidPremiumVal) / inflationAdjustedPaidPremiumVal)*100);
+		double bondCostCoverageDelta = 0;
 		
-		System.out.println("[Actual $$ val of the amount recouped towards premium] "+couponInterestEarning);
-		System.out.println("[Inflation adjusted par value] "+inflationAdjustedParVal);
-		System.out.println("[Inflation adjusted premium value] "+inflationAdjustedPaidPremiumVal);
-		System.out.println("[Return on paid premium] "+returnOnPremiumPaid);
-		System.out.print("[Total Tax on gains] "+Math.round(totalTaxDue));
+		if(deltaBtwParAndPurchaseAmount > 0)
+		{
+			bondCostCoverageDelta = (totalCouponInterestEarnings + deltaBtwParAndPurchaseAmount) - (totalTaxPaid);
+		}else
+		{
+			bondCostCoverageDelta = totalCouponInterestEarnings - (totalTaxPaid + inflationAdjustedPaidPremiumVal);
+		}
+		
+		double yearlySimpleInterestAPR = ((((inflationAdjustedParVal - bondParVal) + (bondCostCoverageDelta)) / bondParVal) / (timeToMaturityInMonths / 12)) * 100;
+		DecimalFormat numberFormat = new DecimalFormat("#.00");
+		
+		System.out.println("[Coupon Interest Total Earnings] $"+totalCouponInterestEarnings);
+		System.out.println("[Inflation adjusted par value] $"+inflationAdjustedParVal);
+		System.out.println("[Inflation adjusted premium value] $"+inflationAdjustedPaidPremiumVal);
+		System.out.println("[Total Tax on gains] $"+Math.round(totalTaxPaid));
+		System.out.println("[Cost Coverage Delta] $"+Math.round(bondCostCoverageDelta));
+		System.out.println("[Simple Interest Yearly Rate of Return (Post Tax)] "+numberFormat.format(yearlySimpleInterestAPR)+"%");		
 	}
 }
