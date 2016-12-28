@@ -52,6 +52,7 @@ How to compile the tool
 1) any package - this will produce the calculator.jar under the lib folder
 
 How to setup/run the tool
+
 1) ssaasa
 
 2) sasasa
