@@ -1,4 +1,7 @@
 # InvestmentCalculators
+
+DISCLAIMER: The author of this tool is NOT responsible in any way, for buy/sell decisions executed based on the information provided by this calculator. Nor is the author responsible for the accuracy of the calculation methodology used in this utility. 
+
 This is an investment 'buy'/'not buy' decision evaluation calculator for US TIPs (United States Treasury Inflation Protected Securities).
 
 The tool takes in the following variables as its input:
