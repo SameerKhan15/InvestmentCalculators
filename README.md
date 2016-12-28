@@ -52,7 +52,6 @@ How to setup/run the tool
 
 1) Clone the git repo - git clone https://github.com/skhansfdc/InvestmentCalculators.git
 2) Set all the required input data, in config/config.properties
-3) Run the calculator by invoking ./executeCalculator.sh. Ensure java is installed (and the PATH is configured) on the machine. 
 
 How to compile the tool
 1) any package - this will produce the calculator.jar under the lib folder
