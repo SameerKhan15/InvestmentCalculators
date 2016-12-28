@@ -50,8 +50,8 @@ d) Taxes on TIPs returns are due each year, both on coupon payments and the incr
 
 How to setup/run the tool
 
-1) Clone the git repo - git clone https://github.com/skhansfdc/InvestmentCalculators.git
-2) Set all the required input data, in config/config.properties
+1) asasa
+2) asas
 
 How to compile the tool
 1) any package - this will produce the calculator.jar under the lib folder
