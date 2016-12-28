@@ -48,3 +48,12 @@ c) When TIPs mature, the investor gets a principal payment equal to the inflatio
 
 d) Taxes on TIPs returns are due each year, both on coupon payments and the increase in principal amount reflecting inflation, even though the Treasury does not pay out the increase until maturity. This is only applicable for TIPs being held in non Tax advantage (example: 401k etc) accounts.
 
+How to setup/run the tool
+
+1) Clone the git repo - git clone https://github.com/skhansfdc/InvestmentCalculators.git
+2) Set all the required input data, in config/config.properties
+3) Run the calculator by invoking ./executeCalculator.sh. Ensure java is installed (and the PATH is configured) on the machine. 
+
+How to compile the tool
+1) any package - this will produce the calculator.jar under the lib folder
+
